@@ -12,7 +12,7 @@ setup(
     description='Database for the CIDeR simulation production for Water Cherenkov detectors',
     license='MIT',
     scripts=['cli/wcprod',
-    'cli/wcprod_gen_shotgun_slac.py',
+    'cli/wcprod_gen_shotgun_slurm.py',
     'cli/wcprod_setup_shotgun.py',
     'cli/wcprod_wrapup_shotgun.py',
     'cli/wcprod_list_config',
@@ -23,6 +23,9 @@ setup(
     install_requires=[
         'numpy',
         'plotly',
+        'pyyaml',
+        'pandas',
+        'tqdm',
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',
