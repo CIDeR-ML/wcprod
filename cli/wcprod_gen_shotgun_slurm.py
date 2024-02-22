@@ -13,7 +13,7 @@ TEMPLATE='''#!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=%d
 #SBATCH --mem-per-cpu=%dG
-#SBATCH --time=%s                                                                                                
+#SBATCH --time=%s
 #SBATCH --array=1-%d%%%d
 %s
 
@@ -49,7 +49,7 @@ do
  echo
  echo "Running Geant4"
  echo `date` && echo `date` >> log.txt  2>&1
- singularity exec %s scp -r /src/WCSim/build/macros ./ 
+ singularity exec %s scp -r /src/WCSim/build/macros ./
  singularity run  %s g4.mac >> log.txt  2>&1
 
  echo
@@ -96,7 +96,7 @@ def parse_config(cfg):
         if not key in cfg.keys():
             print('ERROR: config missing a keyword',key)
             sys.exit(1)
-    
+
     for key in ['CONTAINER_WCSIM','CONTAINER_WCPROD','WCPROD_DB_FILE']:
         if not os.path.isfile(cfg[key]):
             print(f"ERROR: a container missing '{cfg[key]}'")
@@ -166,9 +166,9 @@ def main():
         cfg['CONTAINER_WCPROD'],
         )
 
-    with open('run_shotgun_slac.sh','w') as f:
+    with open('run_shotgun_slurm.sh','w') as f:
         f.write(script)
-        
+
 
 if __name__ == '__main__':
     main()
