@@ -115,9 +115,9 @@ def parse_config(cfg):
 
         cmd = '-B '
         for p in cfg['BIND_PATH']:
-            if not os.path.isdir(os.path.expandvars(p)):
-                print(f"ERROR: cannot bind non-existent path '{cfg['BIND_PATH']}' ")
-                sys.exit(1)
+            # if not os.path.isdir(os.path.expandvars(p)):
+            #     print(f"ERROR: cannot bind non-existent path '{cfg['BIND_PATH']}' ")
+            #     sys.exit(1)
             cmd = cmd + p + ','
 
         cfg['BIND_PATH'] = cmd.rstrip(',')
