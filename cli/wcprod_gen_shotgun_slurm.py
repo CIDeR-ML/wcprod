@@ -13,7 +13,7 @@ TEMPLATE='''#!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=%d
 #SBATCH --mem-per-cpu=%dG
-#SBATCH --time=%s                                                                                                
+#SBATCH --time=%s
 #SBATCH --array=1-%d%%%d
 %s
 
@@ -49,13 +49,13 @@ do
  echo
  echo "Running Geant4"
  echo `date` && echo `date` >> log.txt  2>&1
- singularity exec %s scp -r /src/WCSim/build/macros ./ 
- singularity run  %s g4.mac >> log.txt  2>&1
+ singularity exec %s %s scp -r /src/WCSim/build/macros ./
+ singularity run  %s %s g4.mac >> log.txt  2>&1
 
  echo
  echo "Running check"
  echo `date` && echo `date` >> log.txt  2>&1
- singularity exec %s bash wcprod_check.sh >> log.txt  2>&1
+ singularity exec %s %s bash wcprod_check.sh >> log.txt  2>&1
 
  echo
  echo "Wrapping up"
@@ -96,7 +96,7 @@ def parse_config(cfg):
         if not key in cfg.keys():
             print('ERROR: config missing a keyword',key)
             sys.exit(1)
-    
+
     for key in ['CONTAINER_WCSIM','CONTAINER_WCPROD','WCPROD_DB_FILE']:
         if not os.path.isfile(cfg[key]):
             print(f"ERROR: a container missing '{cfg[key]}'")
@@ -115,9 +115,9 @@ def parse_config(cfg):
 
         cmd = '-B '
         for p in cfg['BIND_PATH']:
-            if not os.path.isdir(p):
-                print(f"ERROR: cannot bind non-existent path '{cfg['BIND_PATH']}' ")
-                sys.exit(1)
+            # if not os.path.isdir(os.path.expandvars(p)):
+            #     print(f"ERROR: cannot bind non-existent path '{cfg['BIND_PATH']}' ")
+            #     sys.exit(1)
             cmd = cmd + p + ','
 
         cfg['BIND_PATH'] = cmd.rstrip(',')
@@ -159,16 +159,19 @@ def main():
         cfg['WCPROD_NLOOPS'],
         cfg['BIND_PATH'],
         cfg['CONTAINER_WCPROD'],
+        cfg['BIND_PATH'],
         cfg['CONTAINER_WCSIM'],
+        cfg['BIND_PATH'],
         cfg['CONTAINER_WCSIM'],
+        cfg['BIND_PATH'],
         cfg['CONTAINER_WCSIM'],
         cfg['BIND_PATH'],
         cfg['CONTAINER_WCPROD'],
         )
 
-    with open('run_shotgun_slac.sh','w') as f:
+    with open('run_shotgun_slurm.sh','w') as f:
         f.write(script)
-        
+
 
 if __name__ == '__main__':
     main()
