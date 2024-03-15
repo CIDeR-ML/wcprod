@@ -97,9 +97,20 @@ def parse_config(cfg):
             print('ERROR: config missing a keyword',key)
             sys.exit(1)
 
-    for key in ['CONTAINER_WCSIM','CONTAINER_WCPROD','WCPROD_DB_FILE']:
+    try:
+        on_nersc = cfg['NERSC']
+    except KeyError:
+        on_nersc = False
+
+    if not on_nersc:
+        for key in ['CONTAINER_WCSIM','CONTAINER_WCPROD']:
+            if not os.path.isfile(cfg[key]):
+                print(f"ERROR: a container missing '{cfg[key]}'")
+                sys.exit(1)
+
+    for key in ['WCPROD_DB_FILE']:
         if not os.path.isfile(cfg[key]):
-            print(f"ERROR: a container missing '{cfg[key]}'")
+            print(f"ERROR: a database missing '{cfg[key]}'")
             sys.exit(1)
 
     db=wcprod.wcprod_db(cfg['WCPROD_DB_FILE'])
