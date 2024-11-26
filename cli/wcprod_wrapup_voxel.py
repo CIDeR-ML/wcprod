@@ -75,8 +75,8 @@ def main():
 		print(f"ERROR: output file '{out_file}' already is present in the storage!")
 		print(f"  {storage_file}")
 		sys.exit(ERROR_STORAGE_ALREADY_PRESENT)
-
-	shutil.copy2(out_file,storage_file)
+	else:
+		shutil.copy2(out_file,storage_file)
 
 	# Step 3: check the file in the storage
 	if not os.path.isfile(storage_file):
@@ -84,7 +84,7 @@ def main():
 		sys.exit(ERROR_STORAGE_NOT_PRESENT)
 
 	# Step 4: log to the database
-	db.register_file(project,config_id,storage_file,nphotons*nevents_recorded,tstart-time.time())
+	db.register_file(project,config_id,storage_file,nphotons*nevents_recorded,-tstart+time.time())
 
 	sys.exit(0)
 
