@@ -144,6 +144,19 @@ def parse_config(cfg):
         print(f"ERROR: project '{cfg['WCPROD_PROJECT']}' not found in the database {cfg['WCPROD_DB_FILE']}.")
         sys.exit(1)
 
+    unlock_table = cfg.get('UNLOCK_TABLE', None)
+    if unlock_table is None or unlock_table.lower() == 'none':
+        table_ids = db.get_table_ids(cfg['WCPROD_PROJECT'], cfg['CLUSTER_NAME'])
+        #print(f"Using table IDs: {table_ids} for group {cfg['CLUSTER_NAME']}.")
+    else:
+        table_ids = db.get_table_ids(cfg['WCPROD_PROJECT'], unlock_table)
+        #print(f"Using table IDs: {table_ids} for group {unlock_table}.")
+
+    for tid in range(db.table_count(cfg['WCPROD_PROJECT'])):
+        if tid not in table_ids:
+            #print(f"Locking table id: {tid}")
+            db.lock_table(cfg['WCPROD_PROJECT'], tid)
+
     if 'BIND_PATH' in cfg:
         if not type(cfg['BIND_PATH']) in [type(str()),type(list())]:
             print(f"ERROR: BIND_PATH value '{cfg['BIND_PATH']}' must be a string or a list of strings")
