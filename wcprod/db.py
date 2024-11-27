@@ -522,6 +522,80 @@ class wcprod_db:
         else:
             raise ValueError(f"Invalid cluster name: {cluster}")
 
+    def get_table_status(self, project:str, cluster:str=None, table_id:int=None):
+        """Retrieve the photon generation status of in the production
+
+        Get the number of photons generated and the target number from a project
+
+        Parameters
+        ----------
+        project : str
+            The name of a project to access in the database
+
+        config_id : int (optional)
+            If provided, limit the query to the specified cluster
+
+        table_id : int (optional)
+            If provided, limit the query to the specified subgroup (table)
+
+        Returns
+        -------
+        list
+            number of photons generated, target number
+        """      
+
+        table_ids = []
+
+        if not (cluster is None or cluster.lower() == 'none'):
+            table_ids = self.get_table_ids(project, cluster)
+        else:
+            if table_id is None:
+                table_ids = np.arange(self.table_count(project))
+            else:
+                table_ids = [int(table_id)]
+
+        nPhotonsGen = 0
+        nPhotonsTarget = 0
+        with closing(self._conn.cursor()) as cur:
+            for table_index in table_ids:
+                cmd = f"SELECT photon_ctr,target_ctr,lock FROM map_{project} WHERE table_id == {table_index}"
+                cur.execute(cmd)
+                res = cur.fetchall()
+                print("Table %i with lock %i: %i out of %i photons generated" % (table_index, res[0][2], res[0][0], res[0][1]))
+                nPhotonsGen += res[0][0]
+                nPhotonsTarget += res[0][1]
+        flist=[nPhotonsGen,nPhotonsTarget]
+        return flist
+
+    def is_production_finished(self, project:str, cluster:str=None, table_id:int=None):
+        """Check whether the production is finished
+
+        Check production finished or not
+
+        Parameters
+        ----------
+        project : str
+            The name of a project to access in the database
+
+        config_id : int (optional)
+            If provided, limit the query to the specified cluster
+
+        table_id : int (optional)
+            If provided, limit the query to the specified subgroup (table)
+
+        Returns
+        -------
+        bool
+            True = finished, false = not
+        """      
+
+        res = self.get_table_status(project, cluster, table_id)
+        nPhotonsGen = res[0]
+        nPhotonsTarget = res[1]
+        print("Cluster %s: %i out of %i photons generated" % (cluster,nPhotonsGen,nPhotonsTarget))
+
+        return nPhotonsGen>= nPhotonsTarget
+
     def list_files(self,project:str,config_id:int=None,table_id:int=None):
         """Retrieve a list of files produced in the production
 
@@ -560,6 +634,51 @@ class wcprod_db:
             for table_index in table_ids:
                 cmd = f"SELECT file_path FROM file_{project}{table_index} "
                 if config_id:
+                    cmd += f"WHERE config_id={config_id}"
+                cur.execute(cmd)
+                flist = flist + [fs[0] for fs in cur.fetchall()]
+        return flist
+
+    def list_durations(self,project:str,config_id:int=None,table_id:int=None):
+        """Retrieve a list of durations of files produced in the production
+
+        Download a list of durations of files produced (for a specific config_id and table_id, if provided)
+
+        Parameters
+        ----------
+        project : str
+            The name of a project to access in the database
+
+        config_id : int (optional)
+            If provided, limit the query to the specified configuration
+
+        table_id : int (optional)
+            If provided, limit the query to the specified subgroup (table)
+
+        Returns
+        -------
+        list
+            The durations of the produced files.
+        """        
+        if config_id is None:
+            config_id = -1
+        if int(config_id) >= 0:
+            check = self.table_id(project,config_id)
+            if table_id is None:
+                table_id = check
+            else:
+                assert check == table_id
+        table_ids = []
+        if table_id is None:
+            table_ids = np.arange(self.table_count(project))
+        else:
+            table_ids = [table_id]
+        
+        flist=[]
+        with closing(self._conn.cursor()) as cur:
+            for table_index in table_ids:
+                cmd = f"SELECT duration FROM file_{project}{table_index} "
+                if int(config_id) > 0:
                     cmd += f"WHERE config_id={config_id}"
                 cur.execute(cmd)
                 flist = flist + [fs[0] for fs in cur.fetchall()]
