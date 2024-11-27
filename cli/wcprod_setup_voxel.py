@@ -105,6 +105,7 @@ data:
         - [energy, np.float32, 1]
       digi_hits:
         - [pmt, np.int32, 10184] # pmt id
+        - [nph, np.int32, 10184] # true photon count
         - [charge, np.float32, 10184]
         - [time, np.float32, 10184]
         - [trigger, np.int32, 10184] # pmt trigger id
