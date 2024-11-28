@@ -12,7 +12,7 @@ cd %s
 ./scripts/run.sh %s ./build/macros/tuning_parameters.mac
 '''
 TEMPLATE_CONVERT_RUN='''#!/bin/bash
-source /src/scripts/sourceme.sh
+source %s
 python3 ${DATATOOLS}/convert.py ./convert.yaml
 '''
 WRAPUP_CONFIG_FILE_NAME='wrapup_job.yaml'
@@ -304,7 +304,7 @@ def main():
 	#	f.write(script_rebin)
 
 	with open(f'{storage_path}/run_convert.sh', 'w') as f:
-		f.write(TEMPLATE_CONVERT_RUN)
+		f.write(TEMPLATE_CONVERT_RUN % wcsim_env)
 
 	#with open(f'{storage_path}/run_rebin.sh', 'w') as f:
 	#	f.write(TEMPLATE_REBIN_RUN)
