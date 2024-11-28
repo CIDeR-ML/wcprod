@@ -224,6 +224,7 @@ def main():
 	tier2 = int((config_id - unit_M*tier1) / unit_K)
 	storage_path = 'tier1_%03d/tier2_%03d/tier3_%09d' % (tier1,tier2,config_id)
 	storage_path = os.path.join(storage_root,storage_path)
+	h5_storage_path = os.path.join(storage_root,'h5')
 
 	try:
 		os.makedirs(storage_path,exist_ok=True)
@@ -231,10 +232,17 @@ def main():
 		print(f"Failed to create the storage directory '{storage_path}'")
 		sys.exit(ERROR_STORAGE_CREATION)
 
+	try:
+		os.makedirs(h5_storage_path,exist_ok=True)
+	except OSError:
+		print(f"Failed to create the h5 storage directory '{h5_storage_path}'")
+		sys.exit(ERROR_STORAGE_CREATION)
+
 	os.chdir(storage_path)
 
 	# Step 2: prepare G4 macro
 	out_file   = '%s/out_%s_%09d_%03d.root' % (storage_path,project,config_id,file_ctr)
+	out_raw_h5 = '%s/raw_%s_%09d_%03d.h5' % (storage_path,project,config_id,file_ctr)
 	contents = TEMPLATE_G4 % (cds_file,nsubevents,nphotons,r0,r1,z0,z1,phi0,phi1,phidir,gap_angle,thetadir,gap_angle,out_file,nevents)
 	with open(f'{storage_path}/log.txt','a') as f:
 		f.write('\n\n'+contents+'\n\n')
@@ -244,7 +252,7 @@ def main():
 	# Step 3: store the configuration for the wrapup file
 	wrapup_cfg = dict(DBFile=dbfile,Project=project,ConfigID=config_id,
 		StartTime=time.time(),
-		Destination=storage_path,Output=out_file,
+		Destination=h5_storage_path,Output=out_raw_h5,
 		NPhotons=nphotons,NSubEvents=nsubevents,NEvents=nevents,)
 	wrapup_file = WRAPUP_CONFIG_FILE_NAME
 	#wrapup_record = '%s/wrapup_%s_%09d_%03d.yaml' % (storage_path, project,config_id,file_ctr)
@@ -286,7 +294,6 @@ def main():
 	with open(f'{storage_path}/run_wcsim.sh', 'w') as f:
 		f.write(script_wcsim)
 
-	out_raw_h5 = '%s/raw_%s_%09d_%03d.h5' % (storage_path,project,config_id,file_ctr)
 	script_convert = TEMPLATE_CONVERT % (out_file, out_raw_h5, nphotons*nsubevents, nevents, r0, r1, z0, z1, phi0, phi1, phidir, thetadir)
 	with open(f'{storage_path}/convert.yaml', 'w') as f:
 		f.write(script_convert)
