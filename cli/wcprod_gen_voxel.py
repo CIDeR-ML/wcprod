@@ -17,6 +17,7 @@ TEMPLATE_slurm='''#!/bin/bash
 #SBATCH --mem-per-cpu=%dG
 #SBATCH --time=%s                                                                                                
 #SBATCH --array=1-%d%%%d
+%s
 '''
 
 #for pbs system, e.g. idark
@@ -29,6 +30,17 @@ TEMPLATE_pbs='''#!/bin/bash
 #PBS -l mem=%dgb
 #PBS -l walltime=%s                                                                                      
 #PBS -J 1-1%d
+'''
+
+#for pjm system, e.g. sukap
+TEMPLATE_pjm='''#!/bin/bash
+#PJM -o "%s/wcprod_%%j_%%b.out"
+#PJM -j
+#PJM -L "rscgrp=%s" 
+#PJM -L "vnode=1" 
+#PJM -L "vnode-core=%d" 
+#PJM -L "vnode-mem=%dGi" 
+#PJM -L "elapse=%s" 
 '''
 
 # for condor system, e.g. cern
@@ -224,6 +236,14 @@ def main():
                                          cfg['NJOBS_TOTAL']
                                         )
 
+    elif cfg['CLUSTER_TYPE'] == 'pjm':
+        script_batch = TEMPLATE_pjm   % (cfg['JOB_LOG_DIR'],
+                                         cfg['PJM_QUEUE'],
+                                         cfg['JOB_NCPU'],
+                                         cfg['JOB_MEM'],
+                                         cfg['JOB_TIME']
+                                        )
+
     elif cfg['CLUSTER_TYPE'] == 'condor':
         jt = datetime.strptime(cfg['JOB_TIME'], '%H:%M:%S')
         total_seconds = jt.second + jt.minute * 60 + jt.hour * 3600
@@ -276,6 +296,11 @@ def main():
 
     elif cfg['CLUSTER_TYPE'] == 'pbs':
         with open('run_voxel_pbs.sh','w') as f:
+            f.write(script_batch)
+            f.write(script)
+    
+    elif cfg['CLUSTER_TYPE'] == 'pjm':
+        with open('run_voxel_pjm.sh','w') as f:
             f.write(script_batch)
             f.write(script)
 
