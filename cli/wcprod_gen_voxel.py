@@ -29,7 +29,7 @@ TEMPLATE_pbs='''#!/bin/bash
 #PBS -l nodes=1:ppn=%d
 #PBS -l mem=%dgb
 #PBS -l walltime=%s                                                                                      
-#PBS -J 1-1%d
+#PBS -J 1-%d
 '''
 
 #for pjm system, e.g. sukap
