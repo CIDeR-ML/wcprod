@@ -24,13 +24,13 @@ RUN apt-get -y update && \
 
 RUN mkdir -p /app && cd /app && \
     if [ -d wcprod_cider ]; then rm -rf wcprod_cider; fi && \ 
-    git clone -b production_test https://github.com/CIDeR-ML/wcprod.git wcprod_cider && cd wcprod_cider; fi && \
+    git clone -b production_test https://github.com/CIDeR-ML/wcprod.git wcprod_cider && cd wcprod_cider && \
     pip3 --no-cache-dir install --upgrade .
 
 #datatool
 RUN cd /app && \
     if [ -d CIDeR_DT ]; then rm -rf CIDeR_DT; fi && \  
-    git clone -b cider_DT/develop https://github.com/CIDeR-ML/CIDeR_DT.git && cd CIDeR_DT; fi
+    git clone -b cider_DT/develop https://github.com/CIDeR-ML/CIDeR_DT.git && cd CIDeR_DT
 
 RUN apt-get -y install libspdlog-dev && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
