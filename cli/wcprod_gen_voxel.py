@@ -110,14 +110,14 @@ do
  singularity exec %s %s ./wcprod_check.sh >> log.txt  2>&1
 
  echo
- echo "Wrapping up"
- echo `date` && echo `date` >> log.txt  2>&1
- singularity exec %s %s bash -c "wcprod_wrapup_voxel.py wrapup_job.yaml" >> log.txt  2>&1
- 
- echo
  echo "Convert to h5"
  echo `date` && echo `date` >> log.txt  2>&1
  singularity exec %s %s ./run_convert.sh >> log.txt  2>&1 
+
+ echo
+ echo "Wrapping up"
+ echo `date` && echo `date` >> log.txt  2>&1
+ singularity exec %s %s bash -c "wcprod_wrapup_voxel.py wrapup_job.yaml" >> log.txt  2>&1
  
  echo
  echo "Finished!" >> log.txt  2>&1
