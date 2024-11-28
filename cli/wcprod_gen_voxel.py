@@ -4,7 +4,7 @@ import yaml
 import wcprod
 from datetime import datetime
 
-#for slurm system, e.g. slac, idark
+#for slurm system, e.g. slac
 TEMPLATE_slurm='''#!/bin/bash
 #SBATCH --job-name=wcprod
 #SBATCH --nodes=1
@@ -17,7 +17,18 @@ TEMPLATE_slurm='''#!/bin/bash
 #SBATCH --mem-per-cpu=%dG
 #SBATCH --time=%s                                                                                                
 #SBATCH --array=1-%d%%%d
-%s
+'''
+
+#for pbs system, e.g. idark
+TEMPLATE_pbs='''#!/bin/bash
+#PBS -N wcprod
+#PBS -j oe
+#PBS -o %s
+#PBS -q %s
+#PBS -l nodes=1:ppn=%d
+#PBS -l mem=%dgb
+#PBS -l walltime=%s                                                                                      
+#PBS -J 1-1%d
 '''
 
 # for condor system, e.g. cern
@@ -204,6 +215,14 @@ def main():
                                          EXTRA_FLAGS,
                                         )
 
+    elif cfg['CLUSTER_TYPE'] == 'pbs':
+        script_batch = TEMPLATE_pbs   % (cfg['JOB_LOG_DIR'],
+                                         cfg['PBS_QUEUE'],
+                                         cfg['JOB_NCPU'],
+                                         cfg['JOB_MEM'],
+                                         cfg['JOB_TIME'],
+                                         cfg['NJOBS_TOTAL']
+                                        )
 
     elif cfg['CLUSTER_TYPE'] == 'condor':
         jt = datetime.strptime(cfg['JOB_TIME'], '%H:%M:%S')
@@ -252,6 +271,11 @@ def main():
 
     if cfg['CLUSTER_TYPE'] == 'slurm':
         with open('run_voxel_slac.sh','w') as f:
+            f.write(script_batch)
+            f.write(script)
+
+    elif cfg['CLUSTER_TYPE'] == 'pbs':
+        with open('run_voxel_pbs.sh','w') as f:
             f.write(script_batch)
             f.write(script)
 
