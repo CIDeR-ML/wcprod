@@ -45,12 +45,6 @@ RUN mkdir -p /src && mkdir -p /src/scripts
 
 WORKDIR /src
 
-# root
-COPY --from=ciderml/wcsim-root:6.26.04 /src/root /src/root
-
-# geant4
-COPY --from=ciderml/wcsim-geant4:10.3.3 /src/geant4.10.03.p03 /src/geant4.10.03.p03
-
 # hepmc3
 RUN if [ ! -d hepmc3-build ]; then \
     wget http://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.6.tar.gz && \
