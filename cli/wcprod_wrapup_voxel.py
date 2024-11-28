@@ -71,7 +71,7 @@ def main():
 		sys.exit(ERROR_OUTPUT_NOT_PRESENT)
 
 	# Step 2: copy to the storage
-	storage_file = os.path.join(storage,out_file)
+	storage_file = os.path.join(storage,os.path.basename(out_file))
 	if os.path.isfile(storage_file):
 		print(f"ERROR: output file '{out_file}' already is present in the storage!")
 		print(f"  {storage_file}")
