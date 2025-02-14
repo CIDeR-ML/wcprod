@@ -225,7 +225,7 @@ def main():
 	tier2 = int((config_id - unit_M*tier1) / unit_K)
 	storage_path = 'tier1_%03d/tier2_%03d/tier3_%09d' % (tier1,tier2,config_id)
 	storage_path = os.path.join(storage_root,storage_path)
-	h5_storage_path = os.path.join(storage_root,'h5')
+	h5_storage_path = os.path.join(storage_root,'h5_%03d' % (file_ctr))
 
 	try:
 		os.makedirs(storage_path,exist_ok=True)
@@ -257,7 +257,7 @@ def main():
 		NPhotons=nphotons,NSubEvents=nsubevents,NEvents=nevents,)
 	wrapup_file = WRAPUP_CONFIG_FILE_NAME
 	#wrapup_record = '%s/wrapup_%s_%09d_%03d.yaml' % (storage_path, project,config_id,file_ctr)
-	with open(f'{storage_path}/{wrapup_file}', 'a') as f:
+	with open(f'{storage_path}/{wrapup_file}', 'w') as f:
 	    yaml.dump(wrapup_cfg, f, default_flow_style=False)
 	#with open(wrapup_record, 'w') as f:
     #		yaml.dump(wrapup_cfg, f, default_flow_style=False)
