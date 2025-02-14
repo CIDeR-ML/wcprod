@@ -21,8 +21,7 @@ TEMPLATE_G4='''/run/verbose                           1
 /tracking/verbose                      0
 /Tracking/trackParticle                0
 /hits/verbose                          0
-/random/setSeeds                       0 0
-/WCSim/random/seed                     0
+/WCSim/random/seed                     %d
 /WCSim/WCgeom                          nuPRISMBeamTest_16cShort_mPMT
 /WCSim/PMT/ReplicaPlacement            false
 /WCSim/Geometry/RotateBarrelHalfTower  true
@@ -164,6 +163,8 @@ def main():
 	wcsim_home   = cfg['WCSIM_HOME']
 	wcsim_env    = cfg['WCSIM_ENV']
 	cds_file     = cfg['CDS_FILE']
+	seed = int(cfg['seed'])
+	file_ctr = int(cfg['file_ctr'])
 	#rebin_dbfile = cfg['Rebin_DBfile']
 	#rmax = cfg['WC_rmax']
 	#zmax = cfg['WC_zmax']
@@ -200,7 +201,7 @@ def main():
 	else:
 		cfg = db.get_config(project, config_id)
 	assert config_id == cfg['config_id'], f"config_id mismatch: {config_id} != {cfg['config_id']}"
-	file_ctr = cfg['file_ctr']
+	#file_ctr = cfg['file_ctr']
 	dirbin = cfg['dirbin']
 	r0 = cfg['r0']
 	r1 = cfg['r1']
@@ -243,7 +244,7 @@ def main():
 	# Step 2: prepare G4 macro
 	out_file   = '%s/out_%s_%09d_%03d.root' % (storage_path,project,config_id,file_ctr)
 	out_raw_h5 = '%s/raw_%s_%09d_%03d.h5' % (storage_path,project,config_id,file_ctr)
-	contents = TEMPLATE_G4 % (cds_file,nsubevents,nphotons,r0,r1,z0,z1,phi0,phi1,phidir,gap_angle,thetadir,gap_angle,out_file,nevents)
+	contents = TEMPLATE_G4 % (seed,cds_file,nsubevents,nphotons,r0,r1,z0,z1,phi0,phi1,phidir,gap_angle,thetadir,gap_angle,out_file,nevents)
 	with open(f'{storage_path}/log.txt','a') as f:
 		f.write('\n\n'+contents+'\n\n')
 	with open(f'{storage_path}/g4.mac','w') as f:
